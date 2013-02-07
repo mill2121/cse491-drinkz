@@ -184,12 +184,16 @@ def test_bulk_load_inventory_5():
 
 # TEST AGAINST LOAD-LIQUOR-TYPES
 def test_bulk_load_bottle_types_empty_commented():
-        scriptpath = 'bin/load-liquor-types'
-        module = imp.load_source('llt', scriptpath)
-        exit_code = module.main([scriptpath, 'test-data/bottle-types-data-2.txt'])
+    scriptpath = 'bin/load-liquor-types'
+    module = imp.load_source('llt', scriptpath)
+    exit_code = module.main([scriptpath, 'test-data/bottle-types-data-2.txt'])
 
-        assert exit_code == 0, 'non zero exit code %s' % exit_code
-    
+    assert exit_code == 0, 'non zero exit code %s' % exit_code
 
+#CALLS LOAD LIQUOR INVENTORY
+def test_load_liquor_inventory():
+    scriptpath = 'bin/load-liquor-inventory'
+    module = imp.load_source('llt', scriptpath)
+    exit_code = module.main([scriptpath, 'test-data/bottle-types-data-2.txt', 'test-data/bottle-inventory-2.txt'])
 
-
+    assert exit_code == 0, 'non zero exit code %s' % exit_code
