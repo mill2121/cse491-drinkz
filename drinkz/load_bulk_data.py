@@ -12,6 +12,23 @@ import csv                              # Python csv package
 
 from . import db                        # import from local package
 
+def checkEmptyOrCommented(fp):
+    reader = csv.reader(fp)
+
+    for line in reader:
+        if len(line) == 0:
+            print "Skip empty line"
+            continue
+        if line[0].startswith('#'):
+            print "Skip commented string"
+            continue
+        if not line[0].strip():
+            print "Skip empty string"
+            continue
+
+        yield line  
+
+
 def load_bottle_types(fp):
     """
     Loads in data of the form manufacturer/liquor name/type from a CSV file.
@@ -22,17 +39,22 @@ def load_bottle_types(fp):
 
     Returns number of bottle types loaded
     """
-    reader = csv.reader(fp)
+    new_reader = checkEmptyOrCommented(fp)
 
     x = []
     n = 0
-    for line in reader:
-        if line[0].startswith('#'):
-            continue
-        
-        (mfg, name, typ) = line
-        n += 1
-        db.add_bottle_type(mfg, name, typ)
+
+    for line in new_reader:
+        try:
+            (mfg, name, typ) = line
+            n += 1
+            db.add_bottle_type(mfg, name, typ)
+        except ValueError:
+            print "ERROR: Malformed input line"
+            pass
+        except:
+            print "ERROR: Error Unknown"
+            pass
 
     return n
 
@@ -49,12 +71,20 @@ def load_inventory(fp):
     Note that a LiquorMissing exception is raised if bottle_types_db does
     not contain the manufacturer and liquor name already.
     """
-    reader = csv.reader(fp)
+    new_reader = checkEmptyOrCommented(fp)
 
     x = []
     n = 0
-    for (mfg, name, amount) in reader:
-        n += 1
-        db.add_to_inventory(mfg, name, amount)
+    for line in new_reader:
+        try:
+            (mfg, name, amount) = line
+            n += 1
+            db.add_to_inventory(mfg, name, amount)
+        except ValueError:
+            print "ERROR: Malformed input line"
+            pass
+        except:
+            print "ERROR: Error Unknown"
+            pass
 
     return n

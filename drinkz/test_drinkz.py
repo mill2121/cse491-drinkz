@@ -102,3 +102,94 @@ def test_get_liquor_inventory():
         x.append((mfg, liquor))
 
     assert x == [('Johnnie Walker', 'Black Label')], x
+
+
+#-------------------------------------------------------------------------------
+# MY ADDED TESTS FOR HOMEWORK #2
+#-------------------------------------------------------------------------------
+
+#TEST LOAD BOTTOM TYPES FOR NORMAL FILE
+def test_bulk_load_bottle_types_2():
+    db._reset_db()
+
+    fp = open('test-data/bottle-types-data-1.txt')          # make this look like a file handle
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 1, n
+
+# TEST LOAD BOTTOM TYPES FOR COMMENTS AND EMPTY LINES
+def test_bulk_load_bottle_types_3():
+    db._reset_db()
+
+    fp = open('test-data/bottle-types-data-2.txt')          # make this look like a file handle
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 1, n
+
+# TEST LOAD BOTTLE TYPES FOR MALFORMED LINES
+def test_bulk_load_bottle_types_3():
+    db._reset_db()
+
+    fp = open('test-data/bottle-types-missing-liquor.txt')          # make this look like a file handle
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 1, n
+
+# TEST LOAD INVENTORY FOR NORMAL FILE
+def test_bulk_load_inventory_2():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    fp = open('test-data/bottle-inventory-1.txt')               # make this look like a file handle
+    n = load_bulk_data.load_inventory(fp)
+
+    assert n == 1, n
+
+# TEST LOAD INVENTORY FOR COMMENTS AND EMPTY LINES
+def test_bulk_load_inventory_3():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    fp = open('test-data/bottle-inventory-2.txt')               # make this look like a file handle
+    n = load_bulk_data.load_inventory(fp)
+
+    assert n == 1, n
+
+# TEST LOAD INVENTORY FOR MALFORMED LINES
+def test_bulk_load_inventory_4():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    fp = open('test-data/bottle-inventory-missing-liquor.txt')               # make this look like a file handle
+    n = load_bulk_data.load_inventory(fp)
+
+    assert n == 1, n
+
+# TEST LOAD INVENTORY FOR DIFFERENT UNITS
+def test_bulk_load_inventory_5():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    fp = open('test-data/bottle-inventory-different-units.txt')               # make this look like a file handle
+    n = load_bulk_data.load_inventory(fp)
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == '1678 ml', amount
+
+    assert n == 2, n
+
+# TEST AGAINST LOAD-LIQUOR-TYPES
+def test_bulk_load_bottle_types_empty_commented():
+        scriptpath = 'bin/load-liquor-types'
+        module = imp.load_source('llt', scriptpath)
+        exit_code = module.main([scriptpath, 'test-data/bottle-types-data-2.txt'])
+
+        assert exit_code == 0, 'non zero exit code %s' % exit_code
+    
+
+
+
