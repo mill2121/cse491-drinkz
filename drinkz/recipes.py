@@ -7,19 +7,8 @@ class Recipe:
 		self._ingredients = []
 
 		for (alcohol, amount) in ingredients:
-			mlAmount = 0
 			number, unit = amount.split()
-			# Check what unit it is and convert to mL
-			if unit == "ml" or unit == "mL" or unit == "ML":
-				mlAmount += float(number)
-			elif unit == "oz" or unit == "OZ" or unit == "Oz":
-				mlAmount += float(float(number)*29.5735)
-			elif unit == "gallon" or unit == "gallons":
-				mlAmount += float(float(number)*3785.41)
-			elif unit == "liter" or unit == "Liter":
-				mlAmount += float(float(number)*1000.0)
-			else:
-				assert False, 'Error: Incorrect Unit'
+			mlAmount = db.ConvertToMilliters(number, unit);
 
 			self._ingredients.append((alcohol, mlAmount))
 

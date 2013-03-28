@@ -4,6 +4,12 @@ import drinkz.db, drinkz.recipes
 if not os.path.exists('./html'):
 	os.makedirs('./html')
 
+try:
+	drinkz.db.load_db('bin/drinkz_db')
+except IOError:
+	print "ERROR! The specified db file does not exist, no data was loaded. Moving on..."
+	pass
+
 #Create the index file
 f = open("./html/index.html", "w")
 f.write('<html><head></head><body>')
@@ -17,11 +23,11 @@ f.close()
 #--------------------------------------------------------------------------------------------
 
 #Add liquor types to db
-drinkz.db._reset_db()
-drinkz.db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
-drinkz.db.add_bottle_type('V&S Group','Absolute','vodka')
-drinkz.db.add_bottle_type('Diageo', 'Smirnoff', 'vodka')
-drinkz.db.add_bottle_type('Jack Daniels Manufacturing Company', 'Jack Daniels', 'whiskey')
+# drinkz.db._reset_db()
+# drinkz.db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+# drinkz.db.add_bottle_type('V&S Group','Absolute','vodka')
+# drinkz.db.add_bottle_type('Diageo', 'Smirnoff', 'vodka')
+# drinkz.db.add_bottle_type('Jack Daniels Manufacturing Company', 'Jack Daniels', 'whiskey')
 
 
 #Create the liquor_types.html file
@@ -43,11 +49,11 @@ f.close()
 #--------------------------------------------------------------------------------------------
 
 #Add to inventory db
-drinkz.db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
-drinkz.db.add_to_inventory('Johnnie Walker', 'Black Label', '500 ml')
-drinkz.db.add_to_inventory('V&S Group','Absolute', '60 oz')
-drinkz.db.add_to_inventory('Diageo', 'Smirnoff', '1 gallon')
-drinkz.db.add_to_inventory('Jack Daniels Manufacturing Company', 'Jack Daniels', '2.5 liter')
+# drinkz.db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
+# drinkz.db.add_to_inventory('Johnnie Walker', 'Black Label', '500 ml')
+# drinkz.db.add_to_inventory('V&S Group','Absolute', '60 oz')
+# drinkz.db.add_to_inventory('Diageo', 'Smirnoff', '1 gallon')
+# drinkz.db.add_to_inventory('Jack Daniels Manufacturing Company', 'Jack Daniels', '2.5 liter')
 
 #Create the inventory.html file
 f = open("./html/inventory.html", "w")
@@ -69,18 +75,18 @@ f.close()
 #--------------------------------------------------------------------------------------------
 
 #Add recipes to db
-r = drinkz.recipes.Recipe('whiskey on the rocks', [('whiskey',
-                                                   '4 oz')])
-drinkz.db.add_recipe(r)
-r = drinkz.recipes.Recipe('vodka martini', [('vodka', '6 oz'),
-                                            ('vermouth', '1.5 oz')])
-drinkz.db.add_recipe(r)
+# r = drinkz.recipes.Recipe('whiskey on the rocks', [('whiskey',
+#                                                    '4 oz')])
+# drinkz.db.add_recipe(r)
+# r = drinkz.recipes.Recipe('vodka martini', [('vodka', '6 oz'),
+#                                             ('vermouth', '1.5 oz')])
+# drinkz.db.add_recipe(r)
 
-r = drinkz.recipes.Recipe('vomit inducing martini', [('orange juice',
-                                                      '6 oz'),
-                                                     ('vermouth',
-                                                      '1.5 oz')])
-drinkz.db.add_recipe(r)
+# r = drinkz.recipes.Recipe('vomit inducing martini', [('orange juice',
+#                                                       '6 oz'),
+#                                                      ('vermouth',
+#                                                       '1.5 oz')])
+# drinkz.db.add_recipe(r)
 
 #Create the liquor_types.html file
 f = open("./html/recipes.html", "w")

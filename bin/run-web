@@ -1,0 +1,24 @@
+#! /usr/bin/env python
+import sys
+import _mypath
+from wsgiref.simple_server import make_server
+
+from drinkz.app import SimpleApp
+
+if __name__ == '__main__':
+    import random, socket
+    port = random.randint(8000, 9999)
+    
+    app = SimpleApp()
+
+    try:
+    	app.load_db('drinkz_db')
+    except IOError:
+    	print "ERROR! The specified db file does not exist, no data was loaded. Moving on..."
+    	pass
+    
+    httpd = make_server('', port, app)
+    print "Serving on port %d..." % port
+    print "Try using a Web browser to go to http://%s:%d/" % \
+          (socket.getfqdn(), port)
+    httpd.serve_forever()

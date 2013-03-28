@@ -11,10 +11,28 @@ _recipe_db is stored as a dictionary because of two reasons:
 
 import drinkz.recipes
 
+from cPickle import dump, load
+
 # private singleton variables at module level
 _bottle_types_db = set()
 _inventory_db = dict()
 _recipe_db = dict()
+
+
+def ConvertToMilliters(number, unit):
+    # Check what unit it is and convert to mL
+    if unit == "ml" or unit == "mL" or unit == "ML":
+        return float(number)
+    elif unit == "oz" or unit == "OZ" or unit == "Oz":
+        return float(float(number)*29.5735)
+    elif unit == "gallon" or unit == "gallons":
+        return float(float(number)*3785.41)
+    elif unit == "liter" or unit == "Liter":
+        return float(float(number)*1000.0)
+    else:
+        assert False, 'Error: Incorrect Unit'
+        return 0
+
 
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
@@ -22,6 +40,23 @@ def _reset_db():
     _bottle_types_db = set()
     _inventory_db = dict()
     _recipe_db = dict()
+
+def save_db(filename):
+    fp = open(filename, 'wb')
+
+    tosave = (_bottle_types_db, _inventory_db, _recipe_db)
+    dump(tosave, fp)
+
+    fp.close()
+
+def load_db(filename):
+    global _bottle_types_db, _inventory_db, _recipe_db
+    fp = open(filename, 'rb')
+
+    loaded = load(fp)
+    (_bottle_types_db, _inventory_db, _recipe_db) = loaded
+
+    fp.close()
 
 # exceptions in Python inherit from Exception and generally don't need to
 # override any methods.
@@ -77,20 +112,8 @@ def add_to_inventory(mfg, liquor, amount):
         err = "Missing liquor: manufacturer '%s', name '%s'" % (mfg, liquor)
         raise LiquorMissing(err)
 
-    mlAmount = 0
     number, unit = amount.split();
-
-    # Check what unit it is and convert to mL
-    if unit == "ml" or unit == "mL" or unit == "ML":
-        mlAmount += float(number)
-    elif unit == "oz" or unit == "OZ" or unit == "Oz":
-        mlAmount += float(float(number)*29.5735)
-    elif unit == "gallon" or unit == "gallons":
-        mlAmount += float(float(number)*3785.41)
-    elif unit == "liter" or unit == "Liter":
-        mlAmount += float(float(number)*1000.0)
-    else:
-        assert False, 'Error: Incorrect Unit'
+    mlAmount = ConvertToMilliters(number, unit);
 
     if (mfg,liquor) in _inventory_db:
         #inventoryAmount,inventoryUnit = _inventory_db[(mfg, liquor)].split()
