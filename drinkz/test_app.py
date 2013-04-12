@@ -47,7 +47,7 @@ def test_index():
 		app_obj.load_db('bin/drinkz_db')
 	except IOError:
 		print "ERROR! The specified db file does not exist, no data was loaded. Moving on..."
-		pass
+		return
 
 	results = app_obj(environ, my_start_response)
 

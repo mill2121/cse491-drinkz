@@ -103,6 +103,20 @@ def test_get_liquor_inventory():
 
     assert x == [('Johnnie Walker', 'Black Label')], x
 
+#-------------------------------------------------------------------------------
+# MY ADDED TESTS FOR HOMEWORK #5
+#-------------------------------------------------------------------------------
+
+#TEST LOAD BULK FOR RECIPES
+def test_bulk_load_recipes():
+    db._reset_db()
+
+    fp = open('test-data/recipes-data.txt')
+    n = load_bulk_data.load_recipes(fp);
+
+    importedRecipe = db.get_recipe('vodka martini');
+
+    assert importedRecipe._name == 'vodka martini', importedRecipe._name
 
 #-------------------------------------------------------------------------------
 # MY ADDED TESTS FOR HOMEWORK #2

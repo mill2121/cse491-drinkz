@@ -10,7 +10,7 @@ Module to load in bulk data from text files.
 
 import csv                              # Python csv package
 
-from . import db                        # import from local package
+from . import db, recipes
 
 def checkEmptyOrCommented(fp):
     reader = csv.reader(fp)
@@ -27,6 +27,49 @@ def checkEmptyOrCommented(fp):
             continue
 
         yield line  
+
+def load_recipes(fp):
+    """
+    Loads recipes from a CSV file
+
+    Returns number of bottle types loaded
+    """
+
+    new_reader = checkEmptyOrCommented(fp)
+    x = []
+    n = 0
+
+    for line in new_reader:
+
+        try:
+            values = line
+
+            recipeNames = values[0]
+
+            Ingredients = []
+            firstValue = True
+            i = 0
+            while i < len(values):
+                if(firstValue == False):
+                    Ingredients.append((values[i], values[i+1]))
+                    i+=2
+                else:
+                    firstValue = False
+                    i+=1
+                n += 1
+
+            db.add_recipe(recipes.Recipe(values[0], Ingredients))
+        except ValueError:
+            print "ERROR: Malformed input line "
+            print values
+            pass
+        except:
+            print "ERROR: Error Unknown "
+            print Ingredients
+            print len(values)
+            pass
+
+    return n
 
 
 def load_bottle_types(fp):

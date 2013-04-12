@@ -34,6 +34,25 @@ def ConvertToMilliters(number, unit):
         return 0
 
 
+def  CheckRecipesAvailable():
+    # Check all of the recipes and return which ones we can make with the inventory
+    # recipes.Recipe('vodka martini', [('unflavored vodka', '6 oz'), ('vermouth', '1.5 oz')])
+
+    global _recipe_db, _inventory_db
+
+    recipes = list(drinkz.db.get_all_recipes())
+    recipesAvailable = set()
+
+    for recipe in recipes:
+            ingredientsNeeded = recipe.need_ingredients();
+            if(len(ingredientsNeeded) == 0):
+                recipesAvailable.add(recipe._name)
+
+    return recipesAvailable;
+
+
+
+
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
     global _bottle_types_db, _inventory_db, _recipe_db
