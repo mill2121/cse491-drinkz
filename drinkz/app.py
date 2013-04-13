@@ -2,7 +2,8 @@
 from wsgiref.simple_server import make_server
 import urlparse
 import simplejson
-import drinkz.db
+import db
+import recipes
 
 dispatch = {
     '/' : 'index',
@@ -24,6 +25,7 @@ dispatch = {
 html_headers = [('Content-type', 'text/html')]
 
 class SimpleApp(object):
+
     def __call__(self, environ, start_response):
 
         path = environ['PATH_INFO']
@@ -41,7 +43,7 @@ class SimpleApp(object):
         return fn(environ, start_response)
 
     def load_db(self, filename):
-        drinkz.db.load_db(filename)
+        db.load_db(filename)
             
     def index(self, environ, start_response):
         data = """
@@ -103,7 +105,7 @@ body { font-size:14px; }
 <hr />
 <ul>
 """
-        recipes = list(drinkz.db.get_all_recipes())
+        recipes = list(db.get_all_recipes())
         for r in recipes:
             missing_ingredients = r.need_ingredients()
             if len(missing_ingredients) == 0:
@@ -143,7 +145,7 @@ body { font-size:14px; }
 <hr />
 <ul>
 """
-        bottle_types = list(drinkz.db.get_all_bottle_types())
+        bottle_types = list(db.get_all_bottle_types())
         for (m, l, t) in bottle_types:
             text += "\t<li>" + t + "</li>\n"
         text += '</ul>'
@@ -177,9 +179,9 @@ body { font-size:14px; }
 <hr />
 <ul>
 """
-        liquor_inventory = list(drinkz.db.get_liquor_inventory())
+        liquor_inventory = list(db.get_liquor_inventory())
         for (m,l) in liquor_inventory:
-            amount = drinkz.db.get_liquor_amount(m,l)
+            amount = db.get_liquor_amount(m,l)
             text += "\t<li>" + m + " - " + l + " - " + str(amount) + "ml</li>\n"
         text += '</ul>'
         text += '</body></html>'
@@ -229,7 +231,7 @@ body { font-size:14px; }
 
         number, unit = amountToConvert.split();
 
-        amountConverted = drinkz.db.ConvertToMilliters(number, unit)
+        amountConverted = db.ConvertToMilliters(number, unit)
         amountConverted = str(amountConverted) + ' ml'
 
         content_type = 'text/html'
@@ -262,7 +264,7 @@ body { font-size:14px; }
         liquorName = results['liquorName'][0]
         liquorType = results['liquorType'][0]
 
-        drinkz.db.add_bottle_type(liquorMfg, liquorName, liquorType)
+        db.add_bottle_type(liquorMfg, liquorName, liquorType)
 
         content_type = 'text/html'
         data = """
@@ -292,9 +294,9 @@ body { font-size:14px; }
         liquorName = results['liquorName'][0]
         liquorAmount = results['liquorAmount'][0]
 
-        bottleTypeExists = drinkz.db._check_bottle_type_exists(liquorMfg, liquorName)
+        bottleTypeExists = db._check_bottle_type_exists(liquorMfg, liquorName)
         if(bottleTypeExists == True):
-            drinkz.db.add_to_inventory(liquorMfg, liquorName, liquorAmount)
+            db.add_to_inventory(liquorMfg, liquorName, liquorAmount)
 
         content_type = 'text/html'
         data = """
@@ -332,7 +334,7 @@ body { font-size:14px; }
             Ingredients.append((ingredients[i], ingredients[i+1]))
             i+=2
 
-        drinkz.db.add_recipe(drinkz.recipes.Recipe(recipeName, Ingredients))
+        db.add_recipe(recipes.Recipe(recipeName, Ingredients))
 
         content_type = 'text/html'
         data = """
@@ -403,6 +405,45 @@ body { font-size:14px; }
 
     def rpc_add(self, a, b):
         return int(a) + int(b)
+
+    # RPC Function for Homework #5
+
+    def rpc_ConvertToMilliters(self, amount):
+        amnt, unit = amount.split()
+        return db.ConvertToMilliters(amnt, unit);
+
+    def rpc_AddToInventory(self, mfg, liquor, amount):
+        db.add_to_inventory(mfg, liquor, amount);
+
+    def rpc_AddLiquorType(self, mfg, liquorName, liquorType):
+        db.add_bottle_type(mfg, liquorName, liquorType);
+
+    def rpc_AddRecipe(self, recipeName, ingredients):
+
+        ingredients = ingredients.split(',')
+        Ingredients = []
+        i = 0
+        while i < len(ingredients):
+            Ingredients.append((ingredients[i], ingredients[i+1]))
+            i+=2
+
+        db.add_recipe(recipes.Recipe(recipeName, Ingredients));
+
+    def rpc_GetLiquorTypes(self):
+        return list(db.get_all_bottle_types());
+
+    def rpc_GetLiquorInventory(self):
+        return list(db.get_liquor_inventory());
+
+    def rpc_GetRecipes(self):
+        recipes = list(db.get_all_recipes());
+        recipeNames = list()
+
+        for r in recipes:
+            recipeNames.append(r._name)
+
+        return recipeNames
+
     
 def form():
     return """

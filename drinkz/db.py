@@ -9,7 +9,8 @@ _recipe_db is stored as a dictionary because of two reasons:
         database, as it is just the key of _recipe_db.
 """
 
-import drinkz.recipes
+import recipes
+import db
 
 from cPickle import dump, load
 
@@ -40,7 +41,7 @@ def  CheckRecipesAvailable():
 
     global _recipe_db, _inventory_db
 
-    recipes = list(drinkz.db.get_all_recipes())
+    recipes = list(db.get_all_recipes())
     recipesAvailable = set()
 
     for recipe in recipes:
