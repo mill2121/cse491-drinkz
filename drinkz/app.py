@@ -20,6 +20,10 @@ dispatch = {
     '/recv3': 'recv3',
     '/recv4': 'recv4',
     '/rpc'  : 'dispatch_rpc'
+    '/login_1' : 'login1',
+    '/login1_process' : 'login1_process',
+    '/logout' : 'logout',
+    '/status' : 'status'
 }
 
 html_headers = [('Content-type', 'text/html')]
@@ -56,9 +60,21 @@ class SimpleApp(object):
 h1 {text-decoration:underline; text-align:center; color:red;}
 body { font-size:14px; }
 </style>
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
 <script type="text/javascript">
 function showAlertButton() {
-    alert("You pressed an alert button!");
+    $.ajax({
+        type: 'POST',
+        url: '/rpc',
+        dataType: 'json',
+        data: JSON.stringify({method: 'showAlert', params: [], id: '0'}),
+        success: function(data) {
+            alert(data.result);
+        },
+        error: function(data) {
+            alert(data.error);
+        }
+    });
 }
 </script>
 </head>
@@ -358,6 +374,126 @@ body { font-size:14px; }
         start_response('200 OK', list(html_headers))
         return [data]
 
+    # Used to log in a user
+    def login1(self, environ, start_response):
+
+        content_type = 'text/html'
+        data = """
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Login Page</title>
+<style type='text/css'>
+h1 {text-decoration:underline; text-align:center; color:red;}
+body { font-size:14px; }
+</style>
+</head>
+<body><h1>Login Page</h1><br/><br/>
+
+<form action='login1_process'>
+Username: <input type='text' name='name' size='15'>
+<input type='submit' value='log in'>
+</form>
+<br/><br/>
+<a href="/">Return to Index</a>
+
+</body>
+</html>"""
+
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def login1_process(self, environ, start_response):
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        name = results['name'][0]
+        content_type = 'text/html'
+
+        # authentication would go here -- is this a valid username/password,
+        # for example?
+
+        k = str(uuid.uuid4())
+        usernames[k] = name
+
+        headers = list(html_headers)
+        headers.append(('Location', '/status'))
+        headers.append(('Set-Cookie', 'name1=%s' % k))
+
+        start_response('302 Found', headers)
+        return ["Redirect to /status..."]
+
+    def logout(self, environ, start_response):
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1_key = key
+
+                if key in usernames:
+                    del usernames[key]
+                    print 'DELETING'
+
+        pair = ('Set-Cookie',
+                'name1=deleted; Expires=Thu, 01-Jan-1970 00:00:01 GMT;')
+        headers = list(html_headers)
+        headers.append(('Location', '/status'))
+        headers.append(pair)
+
+        start_response('302 Found', headers)
+        return ["Redirect to /status..."]
+
+    def status(self, environ, start_response):
+        start_response('200 OK', list(html_headers))
+
+        name1 = ''
+        name1_key = '*empty*'
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1 = usernames.get(key, '')
+                name1_key = key
+
+        content_type = 'text/html'
+        data = """
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Status Page</title>
+<style type='text/css'>
+h1 {text-decoration:underline; text-align:center; color:red;}
+body { font-size:14px; }
+</style>
+</head>
+<body><h1>Status Page</h1><br/><br/><p>"""
+
+        if(name1_key != "*empty*"):
+            data += "Logged in as: "
+            data += name1
+            data += """
+    </p><br/>"""
+
+            data += """
+    <p>Your key is:
+            """
+            data += name1_key
+        else:
+            data += "You are logged out"
+        data += """
+ </p><br/><br/>
+<a href="/">Return to Index</a>
+</body>
+</html>"""
+
+
+        return [data]
+                
+        #title = 'login status'
+        #template = env.get_template('status.html')
+        #return str(template.render(locals()))
+
 
 
     def dispatch_rpc(self, environ, start_response):
@@ -443,6 +579,9 @@ body { font-size:14px; }
             recipeNames.append(r._name)
 
         return recipeNames
+    
+    def rpc_showAlert(self):
+        return "This is a JavaScript alert triggered by an AJAX call!";
 
     
 def form():
